@@ -67,7 +67,7 @@ def contains(s,lexicon):
     my_result = []
 
     for (word,a) in wordlist[lexicon]:
-        if len(word) >= word_length and all(f >= counts[c] for (c,f) in a.items()) and pattern.search(word):
+        if len(word) >= word_length and all(a.__contains__(c) and f <= a[c] for (c,f) in counts.items()) and pattern.search(word):
             if len(wordlist[lexicon][(word,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(word+'#')
             else:
@@ -147,7 +147,7 @@ def ends_with(s,lexicon):
     my_result = []
     
     for (word,a) in wordlist[lexicon]:
-        if len(word) >= word_length and all(f >= counts[c] for (c,f) in a.items()) and pattern.search(word):
+        if len(word) >= word_length and all(a.__contains__(c) and f <= a[c] for (c,f) in counts.items()) and pattern.search(word):
             if len(wordlist[lexicon][(word,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(word+'#')
             else:
