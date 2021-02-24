@@ -12,10 +12,10 @@ def related(word,lexicon):
     pattern = re.compile(rf'(?<![A-Za-z])(?:{re.escape(word)})S?(?![A-Za-z])', re.IGNORECASE)
     my_result = []
  
-    for w in wordlist[lexicon]:
+    for (w,a) in wordlist[lexicon]:
         x = wordlist[lexicon][w][0]
         if pattern.search(x):
-            if len(wordlist[lexicon][w]) == 6 and lexicon == 'csw#':
+            if len(wordlist[lexicon][(w,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(w+'#')
             else:
                 my_result.append(w)
@@ -38,9 +38,9 @@ def starts_with(word,lexicon):
     pattern = re.compile(rf'^(?:{word})', re.IGNORECASE)
     my_result = []
     
-    for w in wordlist[lexicon]:
+    for (w,a) in wordlist[lexicon]:
         if len(w) >= word_length and pattern.match(w):
-            if len(wordlist[lexicon][w]) == 6 and lexicon == 'csw#':
+            if len(wordlist[lexicon][(w,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(w+'#')
             else:
                 my_result.append(w)
@@ -57,18 +57,28 @@ def starts_with(word,lexicon):
     return num_results, msg
 
 
-def contains(word,lexicon):
-    word = word.replace('?', '.')
-    word_length = len(word)
+def contains(s,lexicon):
+    word = s.replace('?','.')
     pattern = re.compile(word, re.IGNORECASE)
+    word_length = len(s)
+    letters = sorted(s.replace('?', '').upper())
+    mask = ''
+    alpha = 'A'
+    for letter in letters:
+        if letter != alpha:
+            mask = mask + ('[%c-%c]*' % (alpha, chr(ord(letter)-1)))
+            alpha = letter
+        mask = mask + letter
+    mask = mask + ('[%c-Z]*' % (alpha))
+    pattern2 = re.compile('^%s$' % ''.join(mask), re.IGNORECASE)
     my_result = []
     
-    for w in wordlist[lexicon]:
-        if len(w) >= word_length and pattern.search(w):
-            if len(wordlist[lexicon][w]) == 6 and lexicon == 'csw#':
-                my_result.append(w+'#')
+    for (word,a) in wordlist[lexicon]:
+        if len(word) >= word_length and pattern2.match(a) and pattern.search(word):
+            if len(wordlist[lexicon][(word,a)]) == 6 and lexicon == 'csw#':
+                my_result.append(word+'#')
             else:
-                my_result.append(w)
+                my_result.append(word)
 
     num_results = len(my_result)
     msg = ''
@@ -97,9 +107,9 @@ def pattern(word,lexicon):
     pattern = re.compile(rf'^(?:{word})$', re.IGNORECASE)
     my_result = []
 
-    for w in wordlist[lexicon]:
+    for (w,a) in wordlist[lexicon]:
         if pattern.match(w):
-            if len(wordlist[lexicon][w]) == 6 and lexicon == 'csw#':
+            if len(wordlist[lexicon][(w,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(w+'#')
             else:
                 my_result.append(w)
@@ -118,9 +128,9 @@ def regex(word,lexicon):
     pattern = re.compile(word, re.IGNORECASE)
     my_result = []
 
-    for w in wordlist[lexicon]:
+    for (w,a) in wordlist[lexicon]:
         if pattern.search(w):
-            if len(wordlist[lexicon][w]) == 6 and lexicon == 'csw#':
+            if len(wordlist[lexicon][(w,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(w+'#')
             else:
                 my_result.append(w)
@@ -136,18 +146,28 @@ def regex(word,lexicon):
     return num_results, msg
 
 
-def ends_with(word,lexicon):
-    word = word.replace('?', '.')
-    word_length = len(word)
-    pattern = re.compile(rf'(?:{word})$', re.IGNORECASE)
+def ends_with(s,lexicon):
+    word = s.replace('?','.')
+    pattern = re.compile(rf'(?:{s})$', re.IGNORECASE)
+    word_length = len(s)
+    letters = sorted(s.replace('?', '').upper())
+    mask = ''
+    alpha = 'A'
+    for letter in letters:
+        if letter != alpha:
+            mask = mask + ('[%c-%c]*' % (alpha, chr(ord(letter)-1)))
+            alpha = letter
+        mask = mask + letter
+    mask = mask + ('[%c-Z]*' % (alpha))
+    pattern2 = re.compile('^%s$' % ''.join(mask), re.IGNORECASE)
     my_result = []
     
-    for w in wordlist[lexicon]:
-        if len(w) >= word_length and pattern.search(w):
-            if len(wordlist[lexicon][w]) == 6 and lexicon == 'csw#':
-                my_result.append(w+'#')
+    for (word,a) in wordlist[lexicon]:
+        if len(word) >= word_length and pattern2.match(a) and pattern.search(word):
+            if len(wordlist[lexicon][(word,a)]) == 6 and lexicon == 'csw#':
+                my_result.append(word+'#')
             else:
-                my_result.append(w)
+                my_result.append(word)
   
     num_results = len(my_result)
     msg = ''
@@ -265,9 +285,9 @@ def anagram(s,lexicon):
             mask = mask + ('[%c-Z]{0,%d}' % (alpha, num_blanks))
     pattern = re.compile('^%s$' % ''.join(mask), re.IGNORECASE)
     
-    for word in wordlist[lexicon]:
-        if len(word) == word_length and pattern.match(wordlist[lexicon][word][4]):
-            if len(wordlist[lexicon][word]) == 6 and lexicon == 'csw#':
+    for (word,a) in wordlist[lexicon]:
+        if len(word) == word_length and pattern.match(a):
+            if len(wordlist[lexicon][(word,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(word+'#')
             else:
                 my_result.append(word)
@@ -283,7 +303,7 @@ def middle_hooks(word,lexicon):
 
     for x in range(1, len(word)):
         pattern = re.compile(rf'^(?:{word[0:x]}.{word[x:]})$', re.IGNORECASE)
-        for w in wordlist[lexicon]:
+        for (w,a) in wordlist[lexicon]:
             if len(w) > word_length and pattern.match(w):
                 result.append(w)
     return result
@@ -312,7 +332,7 @@ def open_files():
         f = open("csw.dat", "r")
         line = f.readline().strip("\n").split('	')
         while line != ['']:
-            csw[line[0]] = line[1:]
+            csw[(line[0],line[5])] = line[1:]
             line = f.readline().strip("\n").split('	')
         f.close()
     except FileNotFoundError:
@@ -321,7 +341,7 @@ def open_files():
         f = open("twl.dat", "r")
         line = f.readline().strip("\n").split('	')
         while line != ['']:
-            twl[line[0]] = line[1:]
+            twl[(line[0],line[5])] = line[1:]
             line = f.readline().strip("\n").split('	')
         f.close()
     except FileNotFoundError:
@@ -330,7 +350,7 @@ def open_files():
         f = open("mw.dat", "r")
         line = f.readline().strip("\n").split('	')
         while line != ['']:
-            mw[line[0]] = line[1:]
+            mw[(line[0],line[5])] = line[1:]
             line = f.readline().strip("\n").split('	')
         f.close()
     except FileNotFoundError:
