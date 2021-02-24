@@ -1,1 +1,2 @@
+frozendict==1.2
 twitchio==1.2.1

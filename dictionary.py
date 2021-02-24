@@ -1,3 +1,5 @@
+from collections import Counter
+from frozendict import frozendict
 import re
 import random
 
@@ -61,20 +63,11 @@ def contains(s,lexicon):
     word = s.replace('?','.')
     pattern = re.compile(word, re.IGNORECASE)
     word_length = len(s)
-    letters = sorted(s.replace('?', '').upper())
-    mask = ''
-    alpha = 'A'
-    for letter in letters:
-        if letter != alpha:
-            mask = mask + ('[%c-%c]*' % (alpha, chr(ord(letter)-1)))
-            alpha = letter
-        mask = mask + letter
-    mask = mask + ('[%c-Z]*' % (alpha))
-    pattern2 = re.compile('^%s$' % ''.join(mask), re.IGNORECASE)
+    counts = Counter(s.replace('?', '').upper())
     my_result = []
-    
+
     for (word,a) in wordlist[lexicon]:
-        if len(word) >= word_length and pattern2.match(a) and pattern.search(word):
+        if len(word) >= word_length and all(f >= counts[c] for (c,f) in a.items()) and pattern.search(word):
             if len(wordlist[lexicon][(word,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(word+'#')
             else:
@@ -150,20 +143,11 @@ def ends_with(s,lexicon):
     word = s.replace('?','.')
     pattern = re.compile(rf'(?:{s})$', re.IGNORECASE)
     word_length = len(s)
-    letters = sorted(s.replace('?', '').upper())
-    mask = ''
-    alpha = 'A'
-    for letter in letters:
-        if letter != alpha:
-            mask = mask + ('[%c-%c]*' % (alpha, chr(ord(letter)-1)))
-            alpha = letter
-        mask = mask + letter
-    mask = mask + ('[%c-Z]*' % (alpha))
-    pattern2 = re.compile('^%s$' % ''.join(mask), re.IGNORECASE)
+    counts = Counter(s.replace('?', '').upper())
     my_result = []
     
     for (word,a) in wordlist[lexicon]:
-        if len(word) >= word_length and pattern2.match(a) and pattern.search(word):
+        if len(word) >= word_length and all(f >= counts[c] for (c,f) in a.items()) and pattern.search(word):
             if len(wordlist[lexicon][(word,a)]) == 6 and lexicon == 'csw#':
                 my_result.append(word+'#')
             else:
@@ -332,7 +316,7 @@ def open_files():
         f = open("csw.dat", "r")
         line = f.readline().strip("\n").split('	')
         while line != ['']:
-            csw[(line[0],line[5])] = line[1:]
+            csw[(line[0],frozendict(Counter(line[5])))] = line[1:]
             line = f.readline().strip("\n").split('	')
         f.close()
     except FileNotFoundError:
@@ -341,7 +325,7 @@ def open_files():
         f = open("twl.dat", "r")
         line = f.readline().strip("\n").split('	')
         while line != ['']:
-            twl[(line[0],line[5])] = line[1:]
+            twl[(line[0],frozendict(Counter(line[5])))] = line[1:]
             line = f.readline().strip("\n").split('	')
         f.close()
     except FileNotFoundError:
@@ -350,7 +334,7 @@ def open_files():
         f = open("mw.dat", "r")
         line = f.readline().strip("\n").split('	')
         while line != ['']:
-            mw[(line[0],line[5])] = line[1:]
+            mw[(line[0],frozendict(Counter(line[5])))] = line[1:]
             line = f.readline().strip("\n").split('	')
         f.close()
     except FileNotFoundError:
