@@ -1,13 +1,18 @@
 {
-    "api_token": "oauth:MYAPITOKEN",
-    "irc_token": "oauth:MYIRCTOKEN",
+    "api_token": "MYAPITOKEN",
+    "irc_token": "MYIRCTOKEN",
     "client_id": "MYCLIENTID",
     "nick": "WordSmith",
     "channels": {
         "cocoscrabble": {
             "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ?",
-            "lexicon": "csw",
+            "lexicon": "csw#",
             "command_blacklist": []
         }
+    },
+    "discord": {
+      "token": "MYTOKEN",
+      "guild": "MYGUILDID",
+      "lexicon": "csw#"
     }
 }

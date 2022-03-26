@@ -333,7 +333,6 @@ def unhook(rack, lexicon):
 
 
 def open_files():
-    # wordlist DICTIONARY
     try:
         with open('csw.dat', 'rb') as f:
             if os.stat(f.name).st_size:
@@ -371,3 +370,4 @@ def open_files():
             f.close()
     except FileNotFoundError:
         print('wordlist/wordlist-20210729.txt not found')
+    return wordlist

@@ -6,17 +6,20 @@ def json_decoder(obj):
                     obj['client_id'],
                     obj['nick'],
                     obj['channels'],
+                    obj['discord'],
                     )
     except KeyError:
         return obj
       
 class Config:
-    def __init__(self,api_token,irc_token,client_id,nick,channels):
+    def __init__(self,api_token,irc_token,client_id,nick,channels,discord):
        self.api_token = api_token
        self.irc_token = irc_token
        self.client_id = client_id
        self.nick = nick
-       self.channels=channels
+       self.channels = channels
+       self.discord = discord
+
 def config():       
     f = open('config.json', 'r')
     config = json.loads(f.read(), object_hook=json_decoder)
