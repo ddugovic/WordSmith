@@ -159,14 +159,14 @@ class TwitchBot(commands.Bot):
                 if offensive:
                     pass
                 elif entry:
-                    lexicon = config.channels[ctx.channel.name]['lexicon']
-                    word, entry, definition, mark = self.dictionary.define(word, entry, lexicon, '')
+                    lexicon = self.config.channels[ctx.channel.name]['lexicon']
+                    word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
                     definitions.append('%s%s - %s' % (word, mark, definition))
                     while match := re.match(rf'(?:\([ A-Za-z]+\) )?(?:a |capable of (?:being )?|causing |characterized by |not |one that |one who |somewhat |the state of being |to |to make )?([a-z]+)(?:[,;]| \[)', definition):
                         term = match.group(1).upper()
                         if ratio(word, term) < 0.5:
                             break
-                        word, entry, definition, mark = self.dictionary.define(word, entry, lexicon, '')
+                        word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
                         definitions.append('%s%s - %s' % (word, mark, definition))
                 else:
                     definitions.append(word + '* - not found')

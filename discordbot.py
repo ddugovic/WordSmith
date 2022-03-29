@@ -87,14 +87,14 @@ class DiscordBot(discord.Client):
                     if offensive:
                         pass
                     elif entry:
-                        word, definition = dictionary.define(word, entry, lexicon)
-                        definitions.append('%s%s - %s' % (word, dictionary.decorate(word, entry, lexicon, '')[1], definition))
+                        word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
+                        definitions.append('%s%s - %s' % (word, mark, definition))
                         while match := re.match(rf'(?:\([ A-Za-z]+\) )?(?:a |capable of (?:being )?|causing |characterized by |not |one that |one who |somewhat |the state of being |to |to make )?([a-z]+)(?:[,;]| \[)', definition):
                             term = match.group(1).upper()
                             if ratio(word, term) < 0.5:
                                 break
-                            word, definition = dictionary.define(term, lexicon)
-                            definitions.append('%s%s - %s' % (word, dictionary.decorate(word, entry, lexicon, '')[1], definition))
+                            word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
+                            definitions.append('%s%s - %s' % (word, mark, definition))
                     else:
                         definitions.append(word + '* - not found')
                 msg = '\n'.join(definitions)
