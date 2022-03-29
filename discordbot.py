@@ -43,21 +43,29 @@ class DiscordBot(discord.Client):
             print(len(msg))
             await message.channel.send(msg)
         elif message.content.startswith('!anagram '):
-            words = message.content[9:].split(' ')
-            if len(words) > 0:
+            racks = message.content[9:].split(' ')
+            if racks and len(racks) > 0:
+                lexicon = self.config.discord['lexicon']
                 results = []
                 msg = None
-                length = -1
-                for word in words:
-                    result = dictionary.anagram_1(word.upper(),self.config.discord['lexicon'])
-                    count, words = result
-                    msg = f'{count} %s:\n{words}' % engine.plural('result', count)
-                    print(len(msg))
-                    length += len(msg) + 1
+                length = -2
+                for rack in racks:
+                    if anagrams := dictionary.anagram(rack.upper(), lexicon):
+                        count = len(anagrams)
+                        msg = f'{count} %s' % engine.plural('result', count)
+                        for n, element in enumerate(anagrams):
+                            word, entry = element
+                            if length + len(msg) + len(word) > 465:
+                                msg += f'Limited to first {n} results'
+                                break
+                            msg += ' %s%s' % dictionary.decorate(word, entry, lexicon, '')
+                    else:
+                        msg = 'No anagrams found'
+                    length += len(msg) + 2
                     if length >= 500:
                         break
                     results.append(msg)
-                msg = '\n'.join(results)
+                msg = '; '.join(results)
                 print(len(msg))
                 await message.channel.send(msg)
         elif message.content.startswith('!check '):
