@@ -1,4 +1,3 @@
-from Levenshtein import ratio
 from alphagram import alphagram
 from calculator import equity, evaluate
 from cipher import cipher
@@ -96,13 +95,9 @@ class DiscordBot(discord.Client):
                         pass
                     elif entry:
                         word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
+                        if match := re.match(r'[A-Z]{2,}', entry[1]):
+                            word, entry, definition, mark = dictionary.define(match.group(0), entry, lexicon, '')
                         definitions.append('%s%s - %s' % (word, mark, definition))
-                        while match := re.match(rf'(?:\([ A-Za-z]+\) )?(?:a |capable of (?:being )?|causing |characterized by |not |one that |one who |somewhat |the state of being |to |to make )?([a-z]+)(?:[,;]| \[)', definition):
-                            term = match.group(1).upper()
-                            if ratio(word, term) < 0.5:
-                                break
-                            word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
-                            definitions.append('%s%s - %s' % (word, mark, definition))
                     else:
                         definitions.append(word + '* - not found')
                 msg = '\n'.join(definitions)
