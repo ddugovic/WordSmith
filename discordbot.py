@@ -1,12 +1,14 @@
+import discord
+import config as cf
+import inflect
+import random as rd
+import re
 from alphagram import alphagram
 from calculator import equity, evaluate
 from cipher import cipher
-import config as cf
-import discord
 import dictionary
-import inflect
-import re
 
+custom_commands = cf.custom_commands()
 engine = inflect.engine()
 
 class DiscordBot(discord.Client):
@@ -33,7 +35,14 @@ class DiscordBot(discord.Client):
         if message.author == self.user:
             return
         command = message.content.lower()
-        if match := re.match(rf'!bingo(?: (\d+))?', command):
+        print(command)
+        if command[1:] in custom_commands.keys():
+            with open(custom_commands[command[1:]], 'r') as f:
+               messages = list(f)
+            msg = rd.choice(messages).strip()
+            print(len(msg))
+            await message.channel.send(msg)
+        elif match := re.match(rf'!bingo(?: (\d+))?', command):
             length = int(match.group(1) or '7')
             msg = dictionary.random_word(length, self.config.discord['lexicon'])
             print(len(msg))
