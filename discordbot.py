@@ -32,95 +32,88 @@ class DiscordBot(discord.Client):
     async def on_message(self, message):
         if message.author == self.user:
             return
-        message_content = message.content.lower()
-        if message.content == '!bingo':
-            msg = dictionary.random_word(7, self.config.discord['lexicon'])
+        command = message.content.lower()
+        if match := re.match(rf'!bingo(?: (\d+))?', command):
+            length = int(match.group(1) or '7')
+            msg = dictionary.random_word(length, self.config.discord['lexicon'])
             print(len(msg))
             await message.channel.send(msg)
-        elif message.content == '!random':
-            msg = dictionary.random_word(0, self.config.discord['lexicon'])
+        elif match := re.match(rf'!random(?: (\d+))?', command):
+            length = int(match.group(1) or '0')
+            msg = dictionary.random_word(length, self.config.discord['lexicon'])
             print(len(msg))
             await message.channel.send(msg)
-        elif message.content.startswith('!anagram '):
-            racks = message.content[9:].split(' ')
-            if racks and len(racks) > 0:
-                lexicon = self.config.discord['lexicon']
-                results = []
+        elif match := re.match(rf'!anagram((?: [a-z]+)+)', command):
+            lexicon = self.config.discord['lexicon']
+            results = []
+            for rack in match.group(1).strip().split(' '):
                 msg = None
-                length = -2
-                for rack in racks:
-                    if anagrams := dictionary.anagram(rack.upper(), lexicon):
-                        count = len(anagrams)
-                        msg = f'{count} %s' % engine.plural('result', count)
-                        for n, element in enumerate(anagrams):
-                            word, entry = element
-                            if length + len(msg) + len(word) > 465:
-                                msg += f'Limited to first {n} results'
-                                break
-                            msg += ' %s%s' % dictionary.decorate(word, entry, lexicon, '')
-                    else:
-                        msg = 'No anagrams found'
-                    length += len(msg) + 2
-                    if length >= 500:
-                        break
-                    results.append(msg)
-                msg = '; '.join(results)
+                if anagrams := dictionary.anagram(rack.upper(), lexicon):
+                    count = len(anagrams)
+                    msg = f'{count} %s' % engine.plural('result', count)
+                    for n, element in enumerate(anagrams):
+                        word, entry = element
+                        if len(msg) + len(word) > 465:
+                            msg += f'Limited to first {n} results'
+                            break
+                        msg += ' %s%s' % dictionary.decorate(word, entry, lexicon, '')
+                else:
+                    msg = 'No anagrams found'
+                results.append(msg)
+            msg = '; '.join(results)
+            print(len(msg))
+            await message.channel.send(msg)
+        elif match := re.match(rf'!define((?: [a-z]+)+)', command):
+            lexicon = self.config.discord['lexicon']
+            definitions = []
+            msg = None
+            length = -1
+            for word in match.group(1).strip().split(' '):
+                offensive, word, entry = dictionary.check(word.upper(), lexicon)
+                word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
+                length += len(definition) + 1
+                if length >= 500:
+                    break
+                definitions.append('%s%s - %s' % (word, mark, definition))
+            msg = '\n'.join(definitions)
+            print(len(msg))
+            await message.channel.send(msg)
+        elif match := re.match(rf'!check((?: [a-z]+)+)', command):
+            lexicon = self.config.discord['lexicon']
+            definitions = []
+            for word in match.group(1).strip().split(' '):
+                if re.search('[/!]', word):
+                    return await message.channel.send('Words must not contain / or !')
+                offensive, word, entry = dictionary.check(word.upper(), lexicon)
+                if offensive:
+                    pass
+                elif entry:
+                    word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
+                    if match := re.match(r'[A-Z]{2,}', entry[1]):
+                        word, entry, definition, mark = dictionary.define(match.group(0), entry, lexicon, '')
+                    definitions.append('%s%s - %s' % (word, mark, definition))
+                else:
+                    definitions.append(word + '* - not found')
+            msg = '\n'.join(definitions)
+            print(len(msg))
+            await message.channel.send(msg)
+        elif match := re.match(rf'!related((?: [a-z]+)+)', command):
+            lexicon = self.config.discord['lexicon']
+            results = []
+            msg = None
+            length = -1
+            for word in match.group(1).strip().split(' '):
+                result = dictionary.related(word.upper(), lexicon)
+                count, words = result
+                msg = f'{count} %s:\n{words}' % engine.plural('result', count)
                 print(len(msg))
-                await message.channel.send(msg)
-        elif message.content.startswith('!check '):
-            words = message.content[7:].split(' ')
-            if len(words) > 0:
-                definitions = []
-                msg = None
-                length = -1
-                for word in words:
-                    definition = dictionary.check(word.upper(),self.config.discord['lexicon'])
-                    length += len(definition) + 1
-                    if length >= 500:
-                        break
-                    definitions.append(definition)
-                msg = '\n'.join(definitions)
-                print(len(msg))
-                await message.channel.send(msg)
-        elif message.content.startswith('!define '):
-            words = message.content[8:].split(' ')
-            if words and len(words) > 0:
-                lexicon = self.config.discord['lexicon']
-                definitions = []
-                for word in words:
-                    if re.search('[/!]', word):
-                        return await message.channel.send('Words must not contain / or !')
-                    offensive, word, entry = dictionary.check(word.upper(), lexicon)
-                    if offensive:
-                        pass
-                    elif entry:
-                        word, entry, definition, mark = dictionary.define(word, entry, lexicon, '')
-                        if match := re.match(r'[A-Z]{2,}', entry[1]):
-                            word, entry, definition, mark = dictionary.define(match.group(0), entry, lexicon, '')
-                        definitions.append('%s%s - %s' % (word, mark, definition))
-                    else:
-                        definitions.append(word + '* - not found')
-                msg = '\n'.join(definitions)
-                print(len(msg))
-                await message.channel.send(msg)
-        elif message.content.startswith('!related '):
-            words = message.content[8:].split(' ')
-            if len(words) > 0:
-                results = []
-                msg = None
-                length = -1
-                for word in words:
-                    result = dictionary.related(word.upper(),self.config.discord['lexicon'])
-                    count, words = result
-                    msg = f'{count} %s:\n{words}' % engine.plural('result', count)
-                    print(len(msg))
-                    length += len(msg) + 1
-                    if length >= 500:
-                        break
-                    results.append(msg)
-                msg = '\n'.join(results)
-                print(len(msg))
-                await message.channel.send(msg)
+                length += len(msg) + 1
+                if length >= 500:
+                    break
+                results.append(msg)
+            msg = '\n'.join(results)
+            print(len(msg))
+            await message.channel.send(msg)
 
 def main():
     DiscordBot().run()
