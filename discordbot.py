@@ -118,51 +118,43 @@ class DiscordBot(discord.Client):
                 inflections.append(word.upper() + '* - not found')
         return inflections
 
-    def related(self, stem, page='1'):
-        result = dictionary.related(stem.upper(), self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
-        print(len(msg))
+    def related(self, word, lexicon, page='1'):
+        result = dictionary.related(word, self.config.discord['lexicon'])
+        num, msg = paginate(result, lexicon, int(page))
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
-    def beginswith(self, hook, page='1'):
-        result = dictionary.begins_with(hook.upper(), self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
-        print(len(msg))
+    def beginswith(self, hook, lexicon, page='1'):
+        result = dictionary.begins_with(hook, self.config.discord['lexicon'])
+        num, msg = paginate(result, lexicon, int(page))
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
-    def endswith(self, hook, page='1'):
-        result = dictionary.ends_with(hook.upper(), self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
-        print(len(msg))
+    def endswith(self, hook, lexicon, page='1'):
+        result = dictionary.ends_with(hook, self.config.discord['lexicon'])
+        num, msg = paginate(result, lexicon, int(page))
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
-    def contains(self, stem, page='1'):
-        result = dictionary.contains(stem.upper(), self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
-        print(len(msg))
+    def contains(self, stem, lexicon, page='1'):
+        result = dictionary.contains(stem, self.config.discord['lexicon'])
+        num, msg = paginate(result, lexicon, int(page))
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
-    def pattern(self, pattern, page='1'):
-        result = dictionary.pattern(pattern.upper(), self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
-        print(len(msg))
+    def pattern(self, pattern, lexicon, page='1'):
+        result = dictionary.pattern(pattern, self.config.discord['lexicon'])
+        num, msg = paginate(result, lexicon, int(page))
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
-    def regex(self, pattern, page='1'):
-        result = dictionary.find(pattern.upper(), self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
-        print(len(msg))
+    def regex(self, pattern, lexicon, page='1'):
+        result = dictionary.find(pattern, self.config.discord['lexicon'])
+        num, msg = paginate(result, lexicon, int(page))
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
     def hook(self, stem):
-        msg = dictionary.hook(stem.upper(), self.config.discord['lexicon'])
-        print(len(msg))
+        msg = dictionary.hook(stem, self.config.discord['lexicon'])
         return (msg)
 
-    def unhook(self, rack, page='1'):
+    def unhook(self, rack, lexicon, page='1'):
         result = dictionary.unhook(rack, self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
-        print(len(msg))
+        num, msg = paginate(result, lexicon, int(page))
         return (msg)
 
     def info(self, stems):
@@ -170,7 +162,7 @@ class DiscordBot(discord.Client):
         alphabet = self.config.discord['alphabet']
         results = []
         for stem in stems:
-            msg = dictionary.info(stem.upper(), lexicon, alphabet)
+            msg = dictionary.info(stem, lexicon, alphabet)
             if len(stem) >= 2 and len(stem) <= 5:
                 result = equity(stem, lexicon)
                 if result[0] == '{':
@@ -185,7 +177,7 @@ class DiscordBot(discord.Client):
         results = []
         msg = None
         for rack in racks:
-            if anagrams := dictionary.anagram(rack.upper(), lexicon):
+            if anagrams := dictionary.anagram(rack, lexicon):
                 count = len(anagrams)
                 msg = f'{count} %s' % engine.plural('result', count)
                 for n, element in enumerate(anagrams):
@@ -214,15 +206,15 @@ class DiscordBot(discord.Client):
             else:
                 return f'{word}* not found'
 
-    def crypto(self, text, page='1'):
-        pattern = cipher(text.upper())
+    def crypto(self, text, lexicon, page='1'):
+        pattern = cipher(text)
         result = dictionary.find(pattern, self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
+        num, msg = paginate(result, lexicon, int(page))
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
-    def hidden(self, length, phrase='', page='1'):
+    def hidden(self, length, phrase, lexicon, page='1'):
         result = dictionary.hidden(int(length), phrase, self.config.discord['lexicon'])
-        num, msg = paginate(result, int(page))
+        num, msg = paginate(result, lexicon, int(page))
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
     async def on_message(self, message):
@@ -233,75 +225,77 @@ class DiscordBot(discord.Client):
         if command[1:] in custom_commands.keys():
             with open(custom_commands[command[1:]], 'r') as f:
                 messages = list(f)
-            msg = rd.choice(messages).strip()
+            msg = rd.choice(messages).strip().split(' ')
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!check((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.check(match.group(1).upper().strip().split(' ')))
+
+        lexicon = self.config.discord['lexicon']
+        if match := re.match(rf'!check((?: [a-z]+)+)', command):
+            msg = '\n'.join(self.check(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!common((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.common(match.group(1).upper().strip().split(' ')))
+            msg = '\n'.join(self.common(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!wordnik((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.wordnik(match.group(1).upper().strip().split(' ')))
+            msg = '\n'.join(self.wordnik(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!equity((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.equity(match.group(1).upper().strip().split(' ')))
+            msg = '\n'.join(self.equity(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!sum((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.sum(match.group(1).upper().strip().split(' ')))
+            msg = '\n'.join(self.sum(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!define((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.define(match.group(1).upper().strip().split(' ')))
+            msg = '\n'.join(self.define(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!inflect((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.inflect(match.group(1).upper().strip().split(' ')))
+            msg = '\n'.join(self.inflect(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!related((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.related(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!related ([a-z]+)', command):
+            msg = self.related(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!(?:beginswith|startswith)((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.beginswith(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!(?:beginswith|startswith) ([a-z]+)', command):
+            msg = self.beginswith(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!(?:endswith|finisheswith)((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.endswith(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!(?:endswith|finisheswith) ([a-z]+)', command):
+            msg = self.endswith(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!contains((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.contains(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!contains ([a-z]+)', command):
+            msg = self.contains(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!pattern((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.pattern(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!pattern ([a-z]+)', command):
+            msg = self.pattern(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!regex((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.regex(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!regex ([a-z]+)', command):
+            msg = self.regex(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!hook((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.hook(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!hook ([a-z]+)', command):
+            msg = self.hook(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!unhook((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.unhook(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!unhook ([a-z]+)', command):
+            msg = self.unhook(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!info((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.info(match.group(1).upper().strip().split(' ')))
+            msg = '\n'.join(self.info(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!anagram((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.anagram(match.group(1).upper().strip().split(' ')))
+            msg = '\n'.join(self.anagram(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!bingo(?: (\d+))?', command):
@@ -312,16 +306,16 @@ class DiscordBot(discord.Client):
             msg = self.random((match.group(1) or '0').upper())
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!pronounce ([a-z])+', command):
+        elif match := re.match(rf'!pronounce ([a-z]+)', command):
             msg = self.pronounce(match.group(1).upper())
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!crypto((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.crypto(match.group(1).upper().strip().split(' ')))
+        elif match := re.match(rf'!crypto ([a-z]+)', command):
+            msg = self.crypto(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!hidden (\d+)((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.hidden(match.group(1), match.group(2).upper().strip().split(' ')))
+            msg = self.hidden(match.group(1), match.group(2).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
 

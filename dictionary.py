@@ -18,7 +18,7 @@ def related(word, lexicon, default=None):
     for line in iter(mm.readline, b''):
         word, entry = parse(line)
         if pattern.search(entry[1]) and not offensive(entry[1]):
-            words.append(decorate(word, entry, lexicon, default))
+            words.append((word, entry))
     return words
 
 
