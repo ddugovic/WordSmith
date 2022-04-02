@@ -39,7 +39,7 @@ class DiscordBot(discord.Client):
             offensive, word, entry = dictionary.check(word.upper(), lexicon)
             if not offensive:
                 msg = ('%s%s' % dictionary.decorate(word, entry, lexicon, '')) if entry else ('%s*' % word)
-                results.append((msg + ' is valid VoteYea') if dictionary.common(word.lower()) else (msg + ' not found VoteNay'))
+                results.append((msg + ' is valid :white_check_mark:') if dictionary.common(word.lower()) else (msg + ' not found :negative_squared_cross_mark:'))
         return results
 
     def common(self, words):
@@ -49,7 +49,7 @@ class DiscordBot(discord.Client):
             offensive, word, entry = dictionary.check(word.upper(), lexicon)
             if not offensive:
                 msg = ('%s%s' % dictionary.decorate(word, entry, lexicon, '')) if entry else ('%s*' % word)
-                results.append(msg = (msg + ' is common VoteYea') if dictionary.common(word.lower()) else (msg + ' not common VoteNay'))
+                results.append(msg = (msg + ' is common :white_check_mark:') if dictionary.common(word.lower()) else (msg + ' not common :negative_squared_cross_mark:'))
         return results
 
     def wordnik(self, words):
@@ -59,7 +59,7 @@ class DiscordBot(discord.Client):
             offensive, word, entry = dictionary.check(word.upper(), lexicon)
             if not offensive:
                 msg = ('%s%s' % dictionary.decorate(word, entry, lexicon, '')) if entry else ('%s*' % word)
-                results.append((msg + ' is open-source VoteYea') if dictionary.common(word.lower()) else (msg + ' not open-source VoteNay'))
+                results.append((msg + ' is open-source :white_check_mark:') if dictionary.common(word.lower()) else (msg + ' not open-source :negative_squared_cross_mark:'))
         return results
 
     def equity(self, racks):
