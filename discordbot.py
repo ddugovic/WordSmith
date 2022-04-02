@@ -305,11 +305,11 @@ class DiscordBot(discord.Client):
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!bingo(?: (\d+))?', command):
-            msg = self.bingo(match)
+            msg = self.bingo(match.group(1) or '7')
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!random(?: (\d+))?', command):
-            msg = self.random(match.group(1).upper().strip().split(' ') or '0')
+            msg = self.random((match.group(1) or '0').upper())
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!pronounce ([a-z])+', command):
