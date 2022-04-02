@@ -68,7 +68,7 @@ def find(pattern, lexicon, lower=1, upper=15):
         if lower <= len(match.group(1)) <= upper:
             word, entry = parse(match.group(0))
             if not offensive(entry[1]):
-                result.append((False, word, entry))
+                result.append((word, entry))
     return result
 
 
