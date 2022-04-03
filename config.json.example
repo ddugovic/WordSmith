@@ -13,6 +13,7 @@
     "discord": {
       "token": "MYTOKEN",
       "guild": "MYGUILDID",
+      "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ?",
       "lexicon": "csw#"
     }
 }

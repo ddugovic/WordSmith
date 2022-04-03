@@ -32,8 +32,7 @@ class DiscordBot(discord.Client):
             f'{guild.name}(id: {guild.id})'
         )
 
-    def check(self, words):
-        lexicon = self.config.discord['lexicon']
+    def check(self, words, lexicon):
         results = []
         for word in words:
             offensive, word, entry = dictionary.check(word.upper(), lexicon)
@@ -42,8 +41,7 @@ class DiscordBot(discord.Client):
                 results.append((msg + ' is valid :white_check_mark:') if dictionary.common(word.lower()) else (msg + ' not found :negative_squared_cross_mark:'))
         return results
 
-    def common(self, words):
-        lexicon = self.config.discord['lexicon']
+    def common(self, words, lexicon):
         results = []
         for word in words:
             offensive, word, entry = dictionary.check(word.upper(), lexicon)
@@ -52,8 +50,7 @@ class DiscordBot(discord.Client):
                 results.append(msg = (msg + ' is common :white_check_mark:') if dictionary.common(word.lower()) else (msg + ' not common :negative_squared_cross_mark:'))
         return results
 
-    def wordnik(self, words):
-        lexicon = self.config.discord['lexicon']
+    def wordnik(self, words, lexicon):
         results = []
         for word in words:
             offensive, word, entry = dictionary.check(word.upper(), lexicon)
@@ -62,9 +59,7 @@ class DiscordBot(discord.Client):
                 results.append((msg + ' is open-source :white_check_mark:') if dictionary.common(word.lower()) else (msg + ' not open-source :negative_squared_cross_mark:'))
         return results
 
-    def equity(self, racks):
-        lexicon = self.config.discord['lexicon']
-        alphabet = self.config.discord['alphabet']
+    def equity(self, racks, alphabet, lexicon):
         results = []
         for rack in racks:
             if len(rack) >= 2 and len(rack) <= 5:
@@ -78,16 +73,14 @@ class DiscordBot(discord.Client):
             results.append(msg)
         return results
 
-    def sum(self, racks):
-        alphabet = self.config.discord['alphabet']
+    def sum(self, racks, alphabet):
         results = []
         for rack in racks:
             msg = '%s: %d' % (alphagram(rack.upper(), alphabet), evaluate(rack.upper()))
             results.append(msg)
         return results
 
-    def define(self, words):
-        lexicon = self.config.discord['lexicon']
+    def define(self, words, lexicon):
         definitions = []
         msg = None
         length = -1
@@ -103,8 +96,7 @@ class DiscordBot(discord.Client):
                 definitions.append(word + '* - not found')
         return definitions
 
-    def inflect(self, words):
-        lexicon = self.config.discord['lexicon']
+    def inflect(self, words, lexicon):
         inflections = []
         for word in words:
             if re.search('[/!]', word):
@@ -157,9 +149,7 @@ class DiscordBot(discord.Client):
         num, msg = paginate(result, lexicon, int(page))
         return (msg)
 
-    def info(self, stems):
-        lexicon = self.config.discord['lexicon']
-        alphabet = self.config.discord['alphabet']
+    def info(self, stems, alphabet, lexicon):
         results = []
         for stem in stems:
             msg = dictionary.info(stem, lexicon, alphabet)
@@ -172,8 +162,7 @@ class DiscordBot(discord.Client):
             results.append(msg)
         return results
 
-    def anagram(self, racks):
-        lexicon = self.config.discord['lexicon']
+    def anagram(self, racks, lexicon):
         results = []
         msg = None
         for rack in racks:
@@ -218,7 +207,7 @@ class DiscordBot(discord.Client):
         return (f'{num} %s:\n{msg}' % engine.plural('result', num))
 
     async def on_message(self, message):
-        if message.author == self.user:
+        if message.author.bot:
             return
         command = message.content.lower()
         print(command)
@@ -229,6 +218,7 @@ class DiscordBot(discord.Client):
             print(len(msg))
             await message.channel.send(msg)
 
+        alphabet = self.config.discord['alphabet']
         lexicon = self.config.discord['lexicon']
         if match := re.match(rf'!check((?: [a-z]+)+)', command):
             msg = '\n'.join(self.check(match.group(1).upper().strip().split(' '), lexicon))
@@ -243,11 +233,11 @@ class DiscordBot(discord.Client):
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!equity((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.equity(match.group(1).upper().strip().split(' '), lexicon))
+            msg = '\n'.join(self.equity(match.group(1).upper().strip().split(' '), alphabet, lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!sum((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.sum(match.group(1).upper().strip().split(' '), lexicon))
+            msg = '\n'.join(self.sum(match.group(1).upper().strip().split(' '), alphabet, lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!define((?: [a-z]+)+)', command):
@@ -291,7 +281,7 @@ class DiscordBot(discord.Client):
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!info((?: [a-z]+)+)', command):
-            msg = '\n'.join(self.info(match.group(1).upper().strip().split(' '), lexicon))
+            msg = '\n'.join(self.info(match.group(1).upper().strip().split(' '), alphabet, lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!anagram((?: [a-z]+)+)', command):
