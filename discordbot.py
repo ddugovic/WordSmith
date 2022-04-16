@@ -181,11 +181,13 @@ class DiscordBot(discord.Client):
         return dictionary.random_word(int(length), self.config.discord['lexicon'])
 
     def random(self, option):
+        lexicon = self.config.discord['lexicon']
         if option.isnumeric():
-            return dictionary.random_word(int(option), self.config.discord['lexicon'])
+            return dictionary.random_word(int(option), lexicon)
         else:
-            result = dictionary.related(option.upper(), self.config.discord['lexicon'], '')
-            return '%s%s' % result[0] if len(result) else ''
+            word, entry = rd.choice(dictionary.related(option.upper(), lexicon))
+            word, _, definition, mark = dictionary.define(word, entry, lexicon, '')
+            return '%s%s - %s' % (word, mark, definition)
 
     def pronounce(self, word):
         offensive, word, entry = dictionary.check(word, self.config.discord['lexicon'])
@@ -292,7 +294,7 @@ class DiscordBot(discord.Client):
             msg = self.bingo(match.group(1) or '7')
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!random(?: (\d+))?', command):
+        elif match := re.match(rf'!random(?: (\d+|[a-z]+))?', command):
             msg = self.random((match.group(1) or '0').upper())
             print(len(msg))
             await message.channel.send(msg)
