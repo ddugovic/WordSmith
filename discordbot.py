@@ -37,8 +37,7 @@ class DiscordBot(discord.Client):
         for word in words:
             offensive, word, entry = dictionary.check(word.upper(), lexicon)
             if not offensive:
-                msg = ('%s%s' % dictionary.decorate(word, entry, lexicon, '')) if entry else ('%s*' % word)
-                results.append((msg + ' is valid :white_check_mark:') if dictionary.common(word.lower()) else (msg + ' not found :negative_squared_cross_mark:'))
+                results.append('%s%s is valid :white_check_mark:' % (dictionary.decorate(word, entry, lexicon, '')) if entry else ('%s* not found :negative_squared_cross_mark:' % word))
         return results
 
     def common(self, words, lexicon):
