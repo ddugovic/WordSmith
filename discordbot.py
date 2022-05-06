@@ -109,6 +109,11 @@ class DiscordBot(discord.Client):
                 inflections.append(word.upper() + '* - not found')
         return inflections
 
+    def rhyme(self, word, lexicon, page='1'):
+        result = dictionary.rhyme(word, self.config.discord['lexicon'])
+        num, msg = paginate(result, lexicon, int(page))
+        return (f'{num} %s:\n{msg}' % engine.plural('result', num))
+
     def related(self, word, lexicon, page='1'):
         result = dictionary.related(word, self.config.discord['lexicon'])
         num, msg = paginate(result, lexicon, int(page))
@@ -247,6 +252,10 @@ class DiscordBot(discord.Client):
             await message.channel.send(msg)
         elif match := re.match(rf'!inflect((?: [a-z]+)+)', command):
             msg = '\n'.join(self.inflect(match.group(1).upper().strip().split(' '), lexicon))
+            print(len(msg))
+            await message.channel.send(msg)
+        elif match := re.match(rf'!rhyme ([a-z]+)', command):
+            msg = self.rhyme(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!related ([a-z]+)', command):
