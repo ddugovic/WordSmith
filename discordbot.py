@@ -7,6 +7,7 @@ from alphagram import alphagram
 from calculator import equity, evaluate
 from cipher import cipher
 import dictionary
+from ety import origins, tree
 from pager import paginate, truncate
 
 custom_commands = cf.custom_commands()
@@ -110,7 +111,12 @@ class DiscordBot(discord.Client):
         return inflections
 
     def origin(self, word, lexicon):
-        msg = dictionary.origin(word, self.config.discord['lexicon'])
+        offensive, word, entry = dictionary.check(word.upper(), lexicon)
+        if not offensive:
+            if entry:
+                msg = tree(word.lower()) or f'Origins not found for {word}'
+            else:
+                msg = f'{word.upper()}* not found'
         return (msg)
 
     def rhyme(self, word, lexicon, page='1'):
