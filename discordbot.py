@@ -109,6 +109,10 @@ class DiscordBot(discord.Client):
                 inflections.append(word.upper() + '* - not found')
         return inflections
 
+    def origin(self, word, lexicon):
+        msg = dictionary.origin(word, self.config.discord['lexicon'])
+        return (msg)
+
     def rhyme(self, word, lexicon, page='1'):
         result = dictionary.rhyme(word, self.config.discord['lexicon'])
         num, msg = paginate(result, lexicon, int(page))
@@ -252,6 +256,10 @@ class DiscordBot(discord.Client):
             await message.channel.send(msg)
         elif match := re.match(rf'!inflect((?: [a-z]+)+)', command):
             msg = '\n'.join(self.inflect(match.group(1).upper().strip().split(' '), lexicon))
+            print(len(msg))
+            await message.channel.send(msg)
+        elif match := re.match(rf'!origin ([a-z]+)', command):
+            msg = self.origin(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!rhyme ([a-z]+)', command):
