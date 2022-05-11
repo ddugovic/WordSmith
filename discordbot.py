@@ -276,23 +276,23 @@ class DiscordBot(discord.Client):
             msg = self.related(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!(?:beginswith|startswith) ([a-z]+)', command):
+        elif match := re.match(rf'!(?:beginswith|startswith) ([\.\+\*a-z0-9]+)', command):
             msg = self.beginswith(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!(?:endswith|finisheswith) ([a-z]+)', command):
+        elif match := re.match(rf'!(?:endswith|finisheswith) ([\.\+\*a-z0-9]+)', command):
             msg = self.endswith(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!contains ([a-z]+)', command):
+        elif match := re.match(rf'!contains ([\.\+\*a-z0-9]+)', command):
             msg = self.contains(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!pattern ([a-z]+)', command):
+        elif match := re.match(rf'!pattern ([\.\+\*a-z0-9]+)', command):
             msg = self.pattern(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!regex ([a-z]+)', command):
+        elif match := re.match(rf'!regex ([\.\+\*a-z0-9]+)', command):
             msg = self.regex(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
