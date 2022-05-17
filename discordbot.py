@@ -268,7 +268,7 @@ class DiscordBot(discord.Client):
             msg = self.origin(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
-        elif match := re.match(rf'!rhyme ([a-z]+)', command):
+        elif match := re.match(rf'!rhymeswith ([a-z]+)', command):
             msg = self.rhyme(match.group(1).upper().strip(), lexicon)
             print(len(msg))
             await message.channel.send(msg)
