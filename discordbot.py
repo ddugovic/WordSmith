@@ -56,7 +56,16 @@ class DiscordBot(discord.Client):
             offensive, word, entry = dictionary.check(word.upper(), lexicon)
             if not offensive:
                 msg = ('%s%s' % dictionary.decorate(word, entry, lexicon, '')) if entry else ('%s*' % word)
-                results.append((msg + ' is open-source :white_check_mark:') if dictionary.common(word.lower()) else (msg + ' not open-source :negative_squared_cross_mark:'))
+                results.append((msg + ' is open-source :white_check_mark:') if dictionary.wordnik(word.lower()) else (msg + ' not open-source :negative_squared_cross_mark:'))
+        return results
+
+    def yawl(self, words, lexicon):
+        results = []
+        for word in words:
+            offensive, word, entry = dictionary.check(word.upper(), lexicon)
+            if not offensive:
+                msg = ('%s%s' % dictionary.decorate(word, entry, lexicon, '')) if entry else ('%s*' % word)
+                results.append((msg + ' is open-source :white_check_mark:') if dictionary.yawl(word.lower()) else (msg + ' not open-source :negative_squared_cross_mark:'))
         return results
 
     def equity(self, racks, alphabet, lexicon):
@@ -246,6 +255,10 @@ class DiscordBot(discord.Client):
             await message.channel.send(msg)
         elif match := re.match(rf'!wordnik((?: [a-z]+)+)', command):
             msg = '\n'.join(self.wordnik(match.group(1).upper().strip().split(' '), lexicon))
+            print(len(msg))
+            await message.channel.send(msg)
+        elif match := re.match(rf'!yawl((?: [a-z]+)+)', command):
+            msg = '\n'.join(self.yawl(match.group(1).upper().strip().split(' '), lexicon))
             print(len(msg))
             await message.channel.send(msg)
         elif match := re.match(rf'!equity((?: [a-z]+)+)', command):
